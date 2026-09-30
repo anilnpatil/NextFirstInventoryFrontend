@@ -4,17 +4,18 @@ import { Observable } from 'rxjs';
 
 export interface InventoryItem {
   id: number;
-  description: string;
-  modelNumber: string;
-  partNumber: string;
+  stockGroup: string;
   make: string;
-  rackNumber: string;
+  batchName: string;
+  itemName: string;
+  partNumber: string;
   quantity: number;
-  condition: string;
-  location: string;
+  rate: number | null;
+  value: number | null;
+  rackNumber: string;
 }
 
-export type InventoryField = keyof InventoryItem;
+export type InventoryField = Exclude<keyof InventoryItem, 'id'>;
 export type InventoryFilters = Partial<Record<InventoryField, string>>;
 
 export interface InventorySearchRequest {

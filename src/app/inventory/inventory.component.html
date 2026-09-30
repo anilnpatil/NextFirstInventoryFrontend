@@ -82,10 +82,10 @@
                 <tr>
                   @for (field of fields; track field) {
                     <td>
-                      @if (field === 'condition') {
-                        <span class="status-value" [class.available]="item.condition.toLowerCase() === 'available'">{{ item.condition || '—' }}</span>
-                      } @else if (field === 'quantity') {
+                      @if (field === 'quantity') {
                         <span class="quantity-value">{{ item.quantity | number }}</span>
+                      } @else if (field === 'rate' || field === 'value') {
+                        {{ item[field] === null ? '—' : (item[field] | number:'1.2-2') }}
                       } @else {
                         {{ item[field] || '—' }}
                       }

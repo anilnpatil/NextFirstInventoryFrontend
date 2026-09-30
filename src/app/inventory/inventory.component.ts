@@ -13,7 +13,7 @@ import {
 } from './inventory.service';
 
 const inventoryFields: InventoryField[] = [
-  'description', 'modelNumber', 'partNumber', 'make', 'rackNumber', 'quantity', 'condition', 'location'
+  'stockGroup', 'make', 'batchName', 'itemName', 'partNumber', 'quantity', 'rate', 'value', 'rackNumber'
 ];
 
 @Component({
@@ -33,7 +33,7 @@ export class InventoryComponent implements OnInit {
   protected readonly query = signal('');
   protected readonly page = signal(0);
   protected readonly pageSize = signal(25);
-  protected readonly sortBy = signal<InventoryField>('description');
+  protected readonly sortBy = signal<InventoryField>('itemName');
   protected readonly sortDirection = signal<'asc' | 'desc'>('asc');
   protected readonly totalElements = signal(0);
   protected readonly totalPages = signal(0);
@@ -110,8 +110,8 @@ export class InventoryComponent implements OnInit {
 
   protected label(field: InventoryField): string {
     const labels: Record<InventoryField, string> = {
-      id: 'ID', description: 'Description', modelNumber: 'Model no.', partNumber: 'Part no.',
-      make: 'Make', rackNumber: 'Rack', quantity: 'Stock qty', condition: 'Stock status', location: 'Location'
+      stockGroup: 'Stock Group', make: 'Make', batchName: 'Batch Name', itemName: 'Item Name', partNumber: 'Part No.',
+      quantity: 'Quantity', rate: 'Rate', value: 'Value', rackNumber: 'Rack No'
     };
     return labels[field];
   }
