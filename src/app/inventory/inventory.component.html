@@ -1,0 +1,119 @@
+<div class="workspace-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/" aria-label="NextFirst home">
+      <span class="brand-mark">NF</span>
+      <span class="brand-copy"><strong>NextFirst</strong><small>Inventory workspace</small></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a class="nav-item" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="nav-icon">▦</span><span>Google Sheets</span>
+      </a>
+      <a class="nav-item" routerLink="/inventory" routerLinkActive="active">
+        <span class="nav-icon">◫</span><span>Inventory</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer"><span class="status-dot"></span><span>Workspace online</span></div>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Stock overview</p>
+        <h1>Inventory</h1>
+        <p class="subtitle">Search and inspect every item across your connected sheets.</p>
+      </div>
+      <a class="source-link" routerLink="/">Manage sheets <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <section class="inventory-workspace" aria-labelledby="inventory-title">
+      <div class="table-toolbar">
+        <div class="toolbar-title">
+          <h2 id="inventory-title">All items</h2>
+          <span class="result-count">{{ totalElements() | number }} records</span>
+        </div>
+        <label class="search-box">
+          <span aria-hidden="true">⌕</span>
+          <span class="sr-only">Search all inventory columns</span>
+          <input type="search" [value]="query()" (input)="setQuery($any($event.target).value)" placeholder="Search all columns" />
+          <kbd>Enter</kbd>
+        </label>
+        <button class="clear-button" type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="error-state" role="alert">
+          <span>{{ errorMessage() }}</span>
+          <button type="button" (click)="retry()">Retry</button>
+        </div>
+      }
+
+      <div class="table-scroll" [attr.aria-busy]="isLoading()">
+        <table>
+          <thead>
+            <tr>
+              @for (field of fields; track field) {
+                <th scope="col">
+                  <button type="button" class="sort-button" (click)="sort(field)" [attr.aria-label]="'Sort by ' + label(field)">
+                    {{ label(field) }}
+                    <span class="sort-indicator" [class.selected]="sortBy() === field">
+                      {{ sortBy() === field ? (sortDirection() === 'asc' ? '↑' : '↓') : '↕' }}
+                    </span>
+                  </button>
+                </th>
+              }
+            </tr>
+            <tr class="filter-row">
+              @for (field of fields; track field) {
+                <th scope="col">
+                  <label class="sr-only" [for]="'filter-' + field">Filter {{ label(field) }}</label>
+                  <input [id]="'filter-' + field" type="search" [value]="filters()[field] ?? ''"
+                    (input)="setFilter(field, $any($event.target).value)" [placeholder]="'Filter ' + label(field)" />
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading() && items().length === 0) {
+              <tr><td class="table-message" [attr.colspan]="fields.length"><span class="loader"></span> Loading inventory…</td></tr>
+            } @else if (items().length === 0 && !isLoading()) {
+              <tr><td class="table-message empty-message" [attr.colspan]="fields.length"><strong>No matching inventory</strong><span>Try another search or clear the column filters.</span></td></tr>
+            } @else {
+              @for (item of items(); track item.id) {
+                <tr>
+                  @for (field of fields; track field) {
+                    <td>
+                      @if (field === 'condition') {
+                        <span class="status-value" [class.available]="item.condition.toLowerCase() === 'available'">{{ item.condition || '—' }}</span>
+                      } @else if (field === 'quantity') {
+                        <span class="quantity-value">{{ item.quantity | number }}</span>
+                      } @else {
+                        {{ item[field] || '—' }}
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+        @if (isLoading() && items().length > 0) { <div class="refreshing"><span class="loader"></span> Updating results</div> }
+      </div>
+
+      <footer class="table-footer">
+        <span class="range-label">Showing {{ firstVisibleItem() | number }}–{{ lastVisibleItem() | number }} of {{ totalElements() | number }}</span>
+        <div class="pagination-controls">
+          <label for="page-size">Rows</label>
+          <select id="page-size" [value]="pageSize()" (change)="changePageSize(+$any($event.target).value)">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <button type="button" (click)="changePage(page() - 1)" [disabled]="page() === 0 || isLoading()" aria-label="Previous page">←</button>
+          <span>Page {{ totalPages() === 0 ? 0 : page() + 1 }} of {{ totalPages() }}</span>
+          <button type="button" (click)="changePage(page() + 1)" [disabled]="page() + 1 >= totalPages() || isLoading()" aria-label="Next page">→</button>
+        </div>
+      </footer>
+    </section>
+  </main>
+</div>

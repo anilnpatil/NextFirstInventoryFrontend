@@ -1,0 +1,30 @@
+<div class="workspace-shell">
+  <aside class="sidebar">
+    <div class="brand-mark">NF</div>
+    <div class="brand-copy"><strong>NextFirst</strong><span>Inventory workspace</span></div>
+    <nav aria-label="Primary navigation">
+      <a class="nav-item" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"><span class="nav-icon">▦</span><span>Google Sheets</span></a>
+      <a class="nav-item" routerLink="/inventory" routerLinkActive="active"><span class="nav-icon">◌</span><span>Inventory</span></a>
+    </nav>
+    <div class="sidebar-footer"><span class="status-dot"></span><span>Workspace online</span></div>
+  </aside>
+  <main class="main-content">
+    <header class="page-header"><div><p class="eyebrow">Data sources</p><h1>Google Sheets</h1><p class="subtitle">Keep the sheets that power your inventory in one place.</p></div><div class="header-badge"><span class="pulse-dot"></span> Connected</div></header>
+    <section class="connect-panel" aria-labelledby="connect-title">
+      <div class="panel-icon">↗</div><div class="panel-copy"><p class="eyebrow">Add a data source</p><h2 id="connect-title">Connect a Google Sheet</h2><p>Paste a sheet tab link to make it available to your inventory workspace.</p></div>
+      <form class="link-form" (ngSubmit)="addLink()"><label class="sr-only" for="sheet-name">Location or sheet name</label><input id="sheet-name" name="sheetName" type="text" [(ngModel)]="name" placeholder="Location or sheet name, e.g. Festo Pneumatic" autocomplete="organization" required /><label class="sr-only" for="sheet-url">Google Sheets URL</label><input id="sheet-url" name="sheetUrl" type="url" [(ngModel)]="url" placeholder="https://docs.google.com/spreadsheets/d/.../edit?gid=..." autocomplete="url" required /><button type="submit" [disabled]="isSaving() || !name.trim() || !url.trim()">@if (isSaving()) { <span class="button-spinner"></span> Saving } @else { Add sheet }</button></form>
+      <p class="hint">The link must include a numeric <code>gid</code> for the specific tab.</p>
+      @if (addMessage()) { <p class="action-status success" role="status">{{ addMessage() }}</p> }
+      @if (addError()) { <p class="action-status failure" role="alert">Failed: {{ addError() }}</p> }
+    </section>
+    @if (errorMessage()) { <div class="alert" role="alert"><span>!</span>{{ errorMessage() }}<button type="button" (click)="loadLinks()">Retry</button></div> }
+    <section class="saved-section" aria-labelledby="saved-title">
+      <div class="section-heading"><div><p class="eyebrow">Your sources</p><h2 id="saved-title">Saved sheets <span>{{ links().length }}</span></h2></div><button type="button" class="load-inventory-button" (click)="loadInventoryData()" [disabled]="isLoading() || links().length === 0 || isSyncing()">@if (isSyncing()) { <span class="button-spinner"></span> Loading inventory } @else { Load inventory data }</button></div>
+      @if (syncMessage()) { <p class="sync-message" role="status">{{ syncMessage() }}</p> }
+      @if (syncError()) { <p class="sync-error" role="alert">Failed: {{ syncError() }}</p> }
+      @if (isLoading()) { <div class="loading-state"><span class="loader"></span><span>Loading your sheets...</span></div> } @else if (links().length === 0) { <div class="empty-state"><div class="empty-icon">▤</div><h3>Your sheet library is empty</h3><p>Add your first Google Sheet above to start organizing inventory data.</p></div> } @else {
+        <div class="sheet-list">@for (link of links(); track link.id) { <article class="sheet-card"><div class="sheet-logo">G</div><div class="sheet-details"><h3><a class="sheet-name-link" [href]="link.url" target="_blank" rel="noopener">{{ link.name || 'Unnamed sheet' }} <span aria-hidden="true">↗</span></a></h3><p class="sheet-url" [title]="link.url">{{ link.url }}</p><div class="sheet-meta"><span>Tab ID {{ link.sheetId }}</span><span class="meta-separator"></span><span>Connected source</span></div></div><div class="sheet-actions"><button type="button" class="delete-button" (click)="removeLink(link)" [disabled]="deletingId() === link.id">@if (deletingId() === link.id) { <span class="button-spinner dark"></span> } @else { Remove }</button></div></article> }</div>
+      }
+    </section>
+  </main>
+</div>
